@@ -8,7 +8,5 @@
 #include <string>
 
 std::string montantEnToutesLettres(long double montant);
-std::string dizaineEnToutesLettres(int dizaine);
-
 
 #endif //LABO02_MONTANTENTOUTESLETTRES_H
