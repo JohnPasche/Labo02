@@ -11,9 +11,55 @@ const long double MAX_NUMBER = 999999999999.99;
 const long double MIN_NUMBER = 00.00;
 
 
-string chiffresEnToutesLettres(int chiffres){
+string montantEnToutesLettres(long double montant);
+string chiffresEnToutesLettres(const unsigned int& chiffres);
+string dizaineEnToutesLettres(const unsigned int& dizaine);
+string francsEnToutesLettres(long long francs);
+string nombreParticuliersEnToutesLettres(const unsigned int& nombreParticuliers);
+string convertBlocCentaine(const unsigned int numberToConvert, const bool& isLastPart);
+string affichageGrandNombres(const bool& is_francs_restants, const bool& is_multiple, const string& nomGrandNombre);
+
+
+string montantEnToutesLettres(long double montant){
+    //Return dès le début pour eviter un traitement trop long pour un resultat rapide
+    if(montant>MAX_NUMBER){
+        return "erreur : montant trop grand";
+    }
+    if(montant < MIN_NUMBER){
+        return "erreur : montant negatif";
+    }
+    if(montant == 0.0)
+    {
+        return "zero franc";
+    }
+
     string outputString = "";
-    switch(chiffres){
+    unsigned long long francs = montant;
+    unsigned long long centimes = round((montant - francs) * 100);
+    if(centimes >= 100){
+        centimes = centimes%100;
+        francs += 1;
+    }
+
+    if(francs) {
+        outputString += francsEnToutesLettres(francs);
+        outputString += (francs > 1) ? " francs" : " franc";
+        if(centimes) {
+            outputString += " et ";
+        }
+    }
+
+    if(centimes) {
+        outputString += dizaineEnToutesLettres(centimes);
+        outputString += (centimes > 1) ? " centimes" : " centime";
+    }
+
+    return outputString;
+}
+
+string chiffresEnToutesLettres(const unsigned int& chiffre){
+    string outputString = "";
+    switch(chiffre){
         case 0:
             break;
         case 1:
@@ -46,7 +92,86 @@ string chiffresEnToutesLettres(int chiffres){
     return outputString;
 }
 
-string nombreParticuliersEnToutesLettres(int nombreParticuliers){
+string dizaineEnToutesLettres(const unsigned int& dizaine){
+    string tmpString = "";
+    int dizaineFirst = dizaine / 10;
+    int reste = dizaine % 10;
+    switch(dizaineFirst){
+        case 0:
+            break;
+        case 1:
+            if (reste && reste < 7)
+                return nombreParticuliersEnToutesLettres(reste);
+            tmpString = "dix";
+            break;
+        case 2:
+            tmpString = "vingt";
+            break;
+        case 3:
+            tmpString = "trente";
+            break;
+        case 4:
+            tmpString = "quarante";
+            break;
+        case 5:
+            tmpString = "cinquante";
+            break;
+        case 6:
+            tmpString = "soixante";
+            break;
+        case 7:
+            tmpString = "septante";
+            break;
+        case 8:
+            tmpString = "huitante";
+            break;
+        case 9:
+            tmpString = "nonante";
+    }
+    if(reste){
+        if(dizaineFirst) {
+            if (reste == 1)
+                tmpString += "-et-";
+            else
+                tmpString += "-";
+        }
+        tmpString += chiffresEnToutesLettres(reste);
+    }
+    return tmpString;
+}
+
+string francsEnToutesLettres(long long francs){
+    string francsEnToutesLettres = "";
+    for (unsigned long long i = 1000000000000; i >= 1; i /= 1000) {
+        //Split en partie de 3
+        unsigned int tranche = francs / i;
+        if (tranche != 0) {
+            francsEnToutesLettres += convertBlocCentaine(tranche, i == 1 || (francs - tranche * i) == 0);
+            francs -= tranche * i;
+            switch (i) {
+                case 1000000000:
+                    francsEnToutesLettres += affichageGrandNombres(!francs || (francs - tranche * i) == 0, tranche > 1, "milliard");
+                    break;
+                case 1000000:
+                    francsEnToutesLettres += affichageGrandNombres(!francs || (francs - tranche * i) == 0, tranche > 1, "million");
+                    break;
+                case 1000:
+                    if(tranche > 1){
+                        francsEnToutesLettres += "-";
+                    }else{
+                        francsEnToutesLettres = francsEnToutesLettres.substr(0,francsEnToutesLettres.length()-2);
+                    }
+                    francsEnToutesLettres += "mille";
+            }
+        }
+
+        if (francsEnToutesLettres != "" && francs)
+            francsEnToutesLettres += "-";
+    }
+    return francsEnToutesLettres;
+}
+
+string nombreParticuliersEnToutesLettres(const unsigned int& nombreParticuliers){
     string tmpString;
     switch(nombreParticuliers){
         case 1:
@@ -71,136 +196,36 @@ string nombreParticuliersEnToutesLettres(int nombreParticuliers){
     return tmpString;
 }
 
-string dizaineEnToutesLettres(int dizaine){
+string convertBlocCentaine(const unsigned int numberToConvert, const bool& isLastPart){
     string tmpString = "";
-    int dizaineFirst = dizaine/10;
-    int reste = dizaine - (dizaineFirst * 10);
-    if(dizaineFirst == 1 && reste && reste < 7){
-        tmpString = nombreParticuliersEnToutesLettres(reste);
-    }else{
-        switch(dizaineFirst){
-            case 0:
-                break;
-            case 1:
-                tmpString = "dix";
-                break;
-            case 2:
-                tmpString = "vingt";
-                break;
-            case 3:
-                tmpString = "trente";
-                break;
-            case 4:
-                tmpString = "quarante";
-                break;
-            case 5:
-                tmpString = "cinquante";
-                break;
-            case 6:
-                tmpString = "soixante";
-                break;
-            case 7:
-                tmpString = "septante";
-                break;
-            case 8:
-                tmpString = "huitante";
-                break;
-            case 9:
-                tmpString = "nonante";
-        }
-        if(reste){
-            if(dizaineFirst) {
-                if (reste == 1)
-                    tmpString += "-et-";
-                else
-                    tmpString += "-";
-            }
-            tmpString += chiffresEnToutesLettres(reste);
-        }
-    }
-    return tmpString;
-}
-
-
-string convert(unsigned int numberToConvert, bool isLastPart){
- string tmpString = "";
- int centaine = numberToConvert / 100;
- int dizaine = numberToConvert - (centaine * 100);
+    const unsigned int centaine = numberToConvert / 100;
+    const unsigned int dizaine = numberToConvert % 100;
     if(centaine) {
         if(centaine != 1)
             tmpString += chiffresEnToutesLettres(centaine) + "-";
-
         tmpString += "cent";
     }
     if(dizaine) {
         if (centaine)
             tmpString += "-";
-
         tmpString += dizaineEnToutesLettres(dizaine);
     }
     if(centaine > 1 && !dizaine && isLastPart)
         tmpString += "s";
     return tmpString;
 }
-string francsEnToutesLettres(long long francs){
-    string francsEnToutesLettres = "";
-    for (unsigned long long i = 1000000000000; i >= 1; i /= 1000) {
-        unsigned int tranche = francs / i;
-        if (tranche != 0) {
-            francsEnToutesLettres += convert(tranche, i == 1);
-            francs -= tranche * i;
-            switch (i) {
-                case 1000000000:
-                    francsEnToutesLettres += "-milliard";
-                    francsEnToutesLettres += ((tranche > 1) ? "s" : "");
-                    francsEnToutesLettres += ((!francs) ? " de " : "");
-                    break;
-                case 1000000:
-                    francsEnToutesLettres += "-million";
-                    francsEnToutesLettres += (tranche > 1) ? "s" : "";
-                    francsEnToutesLettres += ((!francs) ? " de" : "");
-                    break;
-                case 1000:
-                    francsEnToutesLettres += "-mille";
-            }
-        }
 
-        if (francsEnToutesLettres != "" && francs)
-            francsEnToutesLettres += "-";
-    }
-    return francsEnToutesLettres;
-}
-
-
-string montantEnToutesLettres(long double montant){
-    if(montant>MAX_NUMBER){
-        return "erreur : montant trop grand";
-    }
-    if(montant < MIN_NUMBER){
-        return "erreur : montant negatif";
-    }
-    if(montant == 0.0)
-    {
-        return "zero franc";
-    }
-    string outputString = "";
-    const unsigned long long FRANCS = montant;
-    const unsigned long long CENTIMES = round((montant - FRANCS) * 100);
-
-    if(FRANCS) {
-        outputString += francsEnToutesLettres(FRANCS);
-        outputString += (FRANCS > 1) ? " francs" : " franc";
-        if(CENTIMES) {
-            outputString += " et ";
-        }
-    }
-
-    if(CENTIMES) {
-        outputString += dizaineEnToutesLettres(CENTIMES);
-        outputString += (CENTIMES > 1) ? " centimes" : " centime";
-    }
-
+string affichageGrandNombres(const bool& is_francs_restants, const bool& is_multiple, const string& nomGrandNombre){
+    string outputString;
+    outputString = (is_francs_restants ? " " : "-");
+    outputString += nomGrandNombre;
+    outputString += (is_multiple ? "s" : "");
+    outputString += (is_francs_restants ? " de" : "");
     return outputString;
 }
+
+
+
+
 
 
