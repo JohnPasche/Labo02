@@ -17,7 +17,7 @@ string dizaineEnToutesLettres(const unsigned int& dizaine);
 string francsEnToutesLettres(long long francs);
 string nombreParticuliersEnToutesLettres(const unsigned int& nombreParticuliers);
 string convertBlocCentaine(const unsigned int numberToConvert, const bool& isLastPart);
-string affichageGrandNombres(const bool& is_francs_restants, const bool& is_multiple, const string& nomGrandNombre);
+string affichageGrandNombres(const bool& is_francs_restants, const bool& is_centaine_only, const bool& is_multiple, const string& nomGrandNombre);
 
 
 string montantEnToutesLettres(long double montant){
@@ -150,10 +150,10 @@ string francsEnToutesLettres(long long francs){
             francs -= tranche * i;
             switch (i) {
                 case 1000000000:
-                    francsEnToutesLettres += affichageGrandNombres(!francs || (francs - tranche * i) == 0, tranche > 1, "milliard");
+                    francsEnToutesLettres += affichageGrandNombres(francs, !(tranche%100), tranche > 1, "milliard");
                     break;
                 case 1000000:
-                    francsEnToutesLettres += affichageGrandNombres(!francs || (francs - tranche * i) == 0, tranche > 1, "million");
+                    francsEnToutesLettres += affichageGrandNombres(francs, !(tranche%100), tranche > 1, "million");
                     break;
                 case 1000:
                     if(tranche > 1){
@@ -215,12 +215,12 @@ string convertBlocCentaine(const unsigned int numberToConvert, const bool& isLas
     return tmpString;
 }
 
-string affichageGrandNombres(const bool& is_francs_restants, const bool& is_multiple, const string& nomGrandNombre){
+string affichageGrandNombres(const bool& is_francs_restants, const bool& is_centaine_only, const bool& is_multiple, const string& nomGrandNombre){
     string outputString;
-    outputString = (is_francs_restants ? " " : "-");
+    outputString = (is_centaine_only || is_francs_restants ? "-" : " ");
     outputString += nomGrandNombre;
     outputString += (is_multiple ? "s" : "");
-    outputString += (is_francs_restants ? " de" : "");
+    outputString += (!is_francs_restants ? " de" : "");
     return outputString;
 }
 
